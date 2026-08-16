@@ -3,7 +3,7 @@
 Projeto Next.js que:
 - Raspagens simples de imagens de qualquer site (img tags e background-image inline).
 - Remove parâmetros de qualidade/resize nas URLs das imagens.
-- Endpoints de proxy para redimensionar proporcionalmente usando sharp.
+- Endpoints de proxy para redimensionar proporcionalmente usando Jimp.
 - Pode ser implantado no Vercel.
 
 Como usar (local):
@@ -22,8 +22,7 @@ Endpoints principais:
   Também aceita &scale=<FATOR> (por exemplo scale=0.5 para reduzir pela metade).
 
 Deploy:
-- Crie um repositório no GitHub e faça push.
-- No Vercel, importe o repositório e faça deploy (Next.js + sharp funcionam no Vercel, o build instala dependências nativas).
+- No Vercel, importe o repositório e faça deploy (Next.js funciona bem; Jimp evita dependências nativas).
 
 Aviso legal:
 - Teste com permissão dos sites alvo. Respeite robots.txt e termos de uso.

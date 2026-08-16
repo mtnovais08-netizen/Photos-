@@ -53,7 +53,6 @@ export default function Home() {
         {images.map((img, idx) => (
           <div key={idx} style={{ display: 'flex', gap: 12, marginBottom: 20, alignItems: 'center' }}>
             <div style={{ width: 160, height: 120, overflow: 'hidden', border: '1px solid #ddd' }}>
-              {/* apresenta a versão proxy padrão (sem tamanho) */}
               <img
                 src={proxyLink(img.cleaned, { w: 320 })}
                 alt=""
