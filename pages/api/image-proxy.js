@@ -1,4 +1,4 @@
-import sharp from 'sharp';
+import Jimp from 'jimp';
 
 /**
  * GET /api/image-proxy?url=<encoded-image-url>&w=<px>&scale=<float>
@@ -18,35 +18,28 @@ export default async function handler(req, res) {
     const arr = await upstream.arrayBuffer();
     const inputBuffer = Buffer.from(arr);
 
-    let img = sharp(inputBuffer, { failOnError: false });
-    const metadata = await img.metadata();
+    const image = await Jimp.read(inputBuffer);
+    const metadataWidth = image.bitmap?.width || null;
 
-    let targetWidth = metadata.width || null;
+    let targetWidth = metadataWidth;
 
     if (w) {
       const parsed = parseInt(w, 10);
       if (!Number.isNaN(parsed) && parsed > 0) targetWidth = parsed;
     } else if (scale) {
       const s = parseFloat(scale);
-      if (!Number.isNaN(s) && metadata.width) targetWidth = Math.round(metadata.width * s);
+      if (!Number.isNaN(s) && metadataWidth) targetWidth = Math.round(metadataWidth * s);
     }
 
-    if (targetWidth && metadata.width) {
-      img = img.resize({ width: targetWidth });
+    if (targetWidth && metadataWidth) {
+      image.resize(targetWidth, Jimp.AUTO);
     }
 
-    // output format heurística
-    const fmt = (metadata.format || 'jpeg').toLowerCase();
-    if (fmt === 'png') img = img.png({ quality: 80 });
-    else if (fmt === 'webp') img = img.webp({ quality: 80 });
-    else img = img.jpeg({ quality: 80 });
+    // normalize to JPEG output for broad compatibility
+    image.quality(80);
+    const outBuffer = await image.getBufferAsync(Jimp.MIME_JPEG);
 
-    const outBuffer = await img.toBuffer();
-
-    // content-type
-    const ct = fmt === 'jpg' ? 'image/jpeg' : `image/${fmt === 'jpg' ? 'jpeg' : fmt}`;
-    res.setHeader('Content-Type', ct);
-    // cache long time — o link é baseado na url de origem + params (cuidado com invalidações)
+    res.setHeader('Content-Type', 'image/jpeg');
     res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
     res.send(outBuffer);
   } catch (err) {
